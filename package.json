@@ -1,0 +1,32 @@
+{
+  "name": "mockup100-pod-customizer",
+  "version": "0.5.8",
+  "private": true,
+  "type": "module",
+  "description": "Build helpers for the Mockup100 Print-on-Demand Customizer for WooCommerce WordPress plugin",
+  "scripts": {
+    "build": "node scripts/build-frontend.mjs",
+    "build:wordpress": "vite build --config vite.config.wordpress.ts",
+    "check": "node --check src/editor/main.js && node --check scripts/build-frontend.mjs && node --check scripts/serve-harness.mjs && php -l includes/class-mockup100-api-proxy.php && php -l includes/class-mockup100-settings.php && php -l includes/class-mockup100-product-binding.php && php -l includes/class-mockup100-rest-controller.php && php -l includes/class-mockup100-designer-page.php && php -l includes/class-mockup100-plugin.php && php scripts/test-rest-controller.php && php scripts/test-settings-and-binding.php",
+    "dev:harness": "node scripts/serve-harness.mjs",
+    "test": "php scripts/test-rest-controller.php && php scripts/test-settings-and-binding.php",
+    "package": "npm run check && bash scripts/package-plugin.sh"
+  },
+  "dependencies": {
+    "@element-plus/icons-vue": "^2.3.2",
+    "axios": "^1.7.9",
+    "element-plus": "^2.8.8",
+    "fabric": "^6.0.2",
+    "jszip": "^3.10.1",
+    "lucide-vue-next": "^1.0.0",
+    "pinia": "^2.3.1",
+    "semver": "^7.6.3",
+    "vue": "^3.5.13",
+    "vue-i18n": "^9.14.4"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^5.2.4",
+    "typescript": "^5.8.3",
+    "vite": "^6.3.2"
+  }
+}

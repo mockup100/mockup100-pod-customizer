@@ -1,0 +1,200 @@
+/* SaaS Enhanced Styles for Template Repository */
+
+/* Entitlement Banner */
+.next-entitlement-banner {
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin: 1.5rem 0;
+  border: 1px solid #dee2e6;
+}
+
+.next-entitlement-info h4 {
+  margin: 0 0 1rem 0;
+  color: #495057;
+  font-weight: 600;
+}
+
+.next-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+}
+
+.next-stat-item {
+  background: white;
+  border-radius: 6px;
+  padding: 1rem;
+  border: 1px solid #dee2e6;
+  text-align: center;
+}
+
+.next-stat-label {
+  display: block;
+  font-size: 0.9rem;
+  color: #6c757d;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+}
+
+.next-stat-value {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #495057;
+}
+
+.next-stat-value.active {
+  color: #28a745;
+}
+
+.next-stat-value.inactive {
+  color: #dc3545;
+}
+
+.next-stat-value.trial {
+  background: #fff3cd;
+  color: #856404;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  display: inline-block;
+}
+
+/* Trial Action */
+.next-trial-action {
+  grid-column: 1 / -1;
+  text-align: center;
+  margin-top: 1rem;
+}
+
+.next-trial-action .next-action.trial {
+  background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+  color: white;
+  border: none;
+  font-weight: 600;
+  padding: 0.75rem 1.5rem;
+}
+
+.next-trial-action p {
+  margin: 0.5rem 0 0 0;
+  font-size: 0.9rem;
+  color: #6c757d;
+}
+
+/* Template Status */
+.next-template-status {
+  display: inline-block;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  margin: 0.25rem 0;
+}
+
+.next-template-status.published {
+  background: #d4edda;
+  color: #155724;
+  border: 1px solid #c3e6cb;
+}
+
+.next-template-status.draft {
+  background: #fff3cd;
+  color: #856404;
+  border: 1px solid #ffeaa7;
+}
+
+.next-template-status.disabled {
+  background: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
+}
+
+/* Template Item Enhancements */
+.next-template-item {
+  border: 1px solid #dee2e6;
+  border-radius: 8px;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.next-template-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  border-color: #007bff;
+}
+
+.next-template-item img {
+  width: 80px;
+  height: 80px;
+  object-fit: cover;
+  border-radius: 6px;
+}
+
+.next-template-item strong {
+  display: block;
+  margin-bottom: 0.25rem;
+  font-size: 1.1rem;
+  color: #495057;
+}
+
+/* Button Enhancements */
+.next-action.publish {
+  background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+  color: white;
+  border: none;
+  font-weight: 600;
+}
+
+.next-action.publish:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+}
+
+.next-action.unpublish {
+  background: linear-gradient(135deg, #ffc107 0%, #fd7e14 100%);
+  color: white;
+  border: none;
+  font-weight: 600;
+}
+
+.next-action.unpublish:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(255, 193, 7, 0.3);
+}
+
+.next-action:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Progress Bar (reuse from saas-enhanced.css) */
+.next-progress-bar {
+  width: 100%;
+  height: 4px;
+  background: #e9ecef;
+  border-radius: 2px;
+  margin-top: 0.5rem;
+  overflow: hidden;
+}
+
+.next-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #28a745, #20c997);
+  transition: width 0.3s ease;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .next-stats-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .next-template-item {
+    padding: 1rem;
+  }
+  
+  .next-template-item img {
+    width: 60px;
+    height: 60px;
+  }
+}

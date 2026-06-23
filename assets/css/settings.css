@@ -1,0 +1,67 @@
+.mockup100-token-panel {
+    margin: 16px 0 24px;
+    padding: 20px;
+    background: #fff;
+    border: 1px solid #dcdcde;
+    border-radius: 6px;
+}
+
+.mockup100-token-summary {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 24px;
+    margin-bottom: 20px;
+}
+
+.mockup100-token-summary__item {
+    display: flex;
+    flex-direction: column;
+    min-width: 160px;
+}
+
+.mockup100-token-summary__label {
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: #50575e;
+}
+
+.mockup100-token-summary__value {
+    margin-top: 4px;
+    font-size: 22px;
+    font-weight: 600;
+    color: #1d2327;
+}
+
+.mockup100-recharge-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 16px;
+}
+
+.mockup100-recharge-card {
+    padding: 16px;
+    border: 1px solid #dcdcde;
+    border-radius: 6px;
+    background: #f6f7f7;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.mockup100-recharge-card h3 {
+    margin: 0;
+    font-size: 15px;
+}
+
+.mockup100-recharge-card p {
+    margin: 0;
+    color: #3c434a;
+    font-size: 13px;
+    line-height: 1.5;
+    flex: 1;
+}
+
+.mockup100-recharge-card a.button {
+    align-self: flex-start;
+}

@@ -1,0 +1,7 @@
+Please rename the SVN slug from "pod-product-designer-mockup100" to "mockup100-pod-customizer".
+The plugin display name is now "Mockup100 Print-on-Demand Customizer for WooCommerce", and the WP.org account email is now "csl@mockup100.com" to confirm ownership of mockup100.com.
+Version 0.5.8 addresses the reported code issues: the product-page inline script now uses wp_enqueue_script, the add-to-cart payload now verifies the WooCommerce nonce before processing, and cart snapshot rename logic now validates the expected ownership prefix before any copy/delete.
+The free plugin no longer presents single-binding limitations in the WooCommerce binding UI.
+Cloud sync and order-status callbacks remain opt-in only and are disabled by default unless the site administrator explicitly enables them in Settings.
+The custom-generated WordPress editor bundle source and build tools are now publicly available in the same free plugin repository and release package, documented in the Source Code & Build section and docs/BUILD.md: https://github.com/mockup100/mockup100-pod-customizer
+Terms of Service and Privacy Policy are available at https://www.mockup100.com/terms and https://www.mockup100.com/privacy
