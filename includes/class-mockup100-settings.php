@@ -342,7 +342,6 @@ class Mockup100_Settings {
         $config = $this->build_mockup100_config();
         $rechargeUrl = $config['tokenRechargeUrl'];
         $gradingUrl = $config['gradingSubscriptionUrl'];
-        $proUrl = $config['proStorefrontUrl'];
         ?>
         <div class="wrap">
             <h1><?php esc_html_e('Mockup100 Settings', 'mockup100-pod-customizer'); ?></h1>
@@ -353,16 +352,12 @@ class Mockup100_Settings {
                 <p class="description"><?php echo esc_html($connection['detail']); ?></p>
             <?php endif; ?>
 
-            <h2><?php esc_html_e('Token Balance & Recharge', 'mockup100-pod-customizer'); ?></h2>
+            <h2><?php esc_html_e('Mockup100 Service Status', 'mockup100-pod-customizer'); ?></h2>
             <div class="mockup100-token-panel" data-mockup100-token-panel>
                 <div class="mockup100-token-summary">
                     <div class="mockup100-token-summary__item">
                         <span class="mockup100-token-summary__label"><?php esc_html_e('Tokens', 'mockup100-pod-customizer'); ?></span>
                         <span class="mockup100-token-summary__value" data-token-balance>—</span>
-                    </div>
-                    <div class="mockup100-token-summary__item">
-                        <span class="mockup100-token-summary__label"><?php esc_html_e('WP Pro Add-on', 'mockup100-pod-customizer'); ?></span>
-                        <span class="mockup100-token-summary__value" data-wp-pro-active>—</span>
                     </div>
                     <div class="mockup100-token-summary__item">
                         <span class="mockup100-token-summary__label"><?php esc_html_e('Grading Subscription', 'mockup100-pod-customizer'); ?></span>
@@ -371,25 +366,18 @@ class Mockup100_Settings {
                 </div>
                 <div class="mockup100-recharge-cards">
                     <div class="mockup100-recharge-card">
-                        <h3><?php esc_html_e('Cloud Token One-Time Top-up', 'mockup100-pod-customizer'); ?></h3>
+                        <h3><?php esc_html_e('Cloud Token Service', 'mockup100-pod-customizer'); ?></h3>
                         <p><?php
-                        echo esc_html('2,000 ($5) / 10,000 ($20) / 50,000 ($80). Permanently valid tokens for HD renders and premium artwork. 512px preview is free for all users.');
+                        echo esc_html__('Open the Mockup100 service page to review available token packages for HD renders and premium artwork.', 'mockup100-pod-customizer');
                         ?></p>
-                        <a class="button button-primary" href="<?php echo esc_url($rechargeUrl); ?>" target="_blank" rel="noopener"><?php esc_html_e('Buy Tokens (opens mockup100.com)', 'mockup100-pod-customizer'); ?></a>
+                        <a class="button button-secondary" href="<?php echo esc_url($rechargeUrl); ?>" target="_blank" rel="noopener"><?php esc_html_e('Open token service page', 'mockup100-pod-customizer'); ?></a>
                     </div>
                     <div class="mockup100-recharge-card">
-                        <h3><?php esc_html_e('Grading Monthly Subscription', 'mockup100-pod-customizer'); ?></h3>
+                        <h3><?php esc_html_e('Grading Service', 'mockup100-pod-customizer'); ?></h3>
                         <p><?php
-                        echo esc_html('$9 Standard / $19 Enterprise. One subscription unlocks multi-size grading on the web console and WordPress editor.');
+                        echo esc_html__('Open the Mockup100 service page to review grading access for the optional external grading workflow.', 'mockup100-pod-customizer');
                         ?></p>
-                        <a class="button button-primary" href="<?php echo esc_url($gradingUrl); ?>" target="_blank" rel="noopener"><?php esc_html_e('Subscribe Grading (opens mockup100.com)', 'mockup100-pod-customizer'); ?></a>
-                    </div>
-                    <div class="mockup100-recharge-card">
-                        <h3><?php esc_html_e('WordPress Pro Add-on (separate plugin)', 'mockup100-pod-customizer'); ?></h3>
-                        <p><?php
-                        echo esc_html('$49 (Single Site) / $99 (Unlimited Sites) one-time lifetime purchase. Unlocks bulk order export and team permission features for WordPress only. Distributed separately outside WordPress.org; not bundled in this plugin.');
-                        ?></p>
-                        <a class="button button-primary" href="<?php echo esc_url($proUrl); ?>" target="_blank" rel="noopener"><?php esc_html_e('Get WP Pro (opens mockup100.com)', 'mockup100-pod-customizer'); ?></a>
+                        <a class="button button-secondary" href="<?php echo esc_url($gradingUrl); ?>" target="_blank" rel="noopener"><?php esc_html_e('Open grading service page', 'mockup100-pod-customizer'); ?></a>
                     </div>
                 </div>
             </div>

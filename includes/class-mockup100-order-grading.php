@@ -111,7 +111,7 @@ class Mockup100_Order_Grading
         echo '<div class="mockup100-order-grading">';
         echo '<p class="description">';
         esc_html_e(
-            'Generate size-graded pattern outputs for design layers in this order. Grading is an optional Mockup100 SaaS subscription ($9 Standard / $19 Enterprise per month, billed by Mockup100 — not by this plugin). New Mockup100 accounts can start a free 30-day trial.',
+            'Generate size-graded pattern outputs for design layers in this order. Grading is an optional Mockup100 external service operated on mockup100.com and billed outside this plugin.',
             'mockup100-pod-customizer'
         );
         echo '</p>';
@@ -206,13 +206,13 @@ class Mockup100_Order_Grading
             'externalEndpoint' => 'https://www.mockup100.com/api/v1/runtime/templates/{templateId}/grading/compose',
             'i18n' => [
                 'consentTitle' => __('Send order design data to Mockup100 Grading?', 'mockup100-pod-customizer'),
-                'consentBody' => __('To generate size-graded pattern outputs, this order line\'s design metadata (template id and part keys) will be sent to the Mockup100 Grading API at https://www.mockup100.com. Grading is a paid Mockup100 SaaS subscription (or free 30-day trial); the plugin itself never bills you. You can revoke this consent at any time on the Mockup100 Settings page.', 'mockup100-pod-customizer'),
+                'consentBody' => __('To generate size-graded pattern outputs, this order line\'s design metadata (template id and part keys) will be sent to the Mockup100 Grading API at https://www.mockup100.com. Grading access is managed on mockup100.com, outside this plugin. You can revoke this consent at any time on the Mockup100 Settings page.', 'mockup100-pod-customizer'),
                 'consentAccept' => __('I agree, generate now', 'mockup100-pod-customizer'),
                 'consentCancel' => __('Cancel', 'mockup100-pod-customizer'),
-                'subscribe' => __('Open subscription page', 'mockup100-pod-customizer'),
+                'subscribe' => __('Open Mockup100 service page', 'mockup100-pod-customizer'),
                 'inProgress' => __('Sending request to Mockup100 Grading…', 'mockup100-pod-customizer'),
                 'success' => __('Grading sizes generated. Open Mockup100 to download the bundle.', 'mockup100-pod-customizer'),
-                'subscriptionRequired' => __('A Mockup100 Grading subscription is required for this feature.', 'mockup100-pod-customizer'),
+                'subscriptionRequired' => __('Mockup100 Grading service access is required for this feature.', 'mockup100-pod-customizer'),
                 'failurePrefix' => __('Grading failed: ', 'mockup100-pod-customizer'),
             ],
         ]);

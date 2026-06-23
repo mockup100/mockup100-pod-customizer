@@ -8,9 +8,6 @@
   const mockup100Config = (window.mockup100Config && typeof window.mockup100Config === 'object')
     ? window.mockup100Config
     : {}
-  const PRO_STOREFRONT_URL = String(mockup100Config.proStorefrontUrl || 'https://www.mockup100.com/pricing#wp-pro')
-  const GRADING_SUBSCRIPTION_URL = String(mockup100Config.gradingSubscriptionUrl || 'https://www.mockup100.com/pricing#grading')
-  const TOKEN_RECHARGE_URL = String(mockup100Config.tokenRechargeUrl || 'https://www.mockup100.com/pricing#tokens')
 
   const root = document.getElementById('mockup100-preview-root')
   if (!root) return
@@ -314,7 +311,6 @@
           </div>
           <div class="mockup100-stage-headerbar">
             <button type="button" class="button" data-role="open-view-preview">View Preview</button>
-            <button type="button" class="button" data-role="open-export">Export</button>
             <button type="button" class="button" data-role="open-results">Results</button>
           </div>
           <div class="mockup100-stage-actions">
@@ -367,21 +363,6 @@
               <div class="mockup100-preview-meta" data-role="preview-meta"></div>
             </div>
           </div>
-        </div>
-      </div>
-      <div class="mockup100-modal-backdrop" data-role="export-modal" hidden>
-        <div class="mockup100-modal mockup100-modal--export">
-          <header class="mockup100-modal__header">
-            <h3>Mockup100 WP Pro Add-on Required</h3>
-            <button type="button" class="mockup100-modal__close" data-role="close-export">×</button>
-          </header>
-          <div class="mockup100-modal__body mockup100-modal__body--stack">
-            <p data-role="export-promo-body">Bulk order export &amp; multi-user team management are exclusive features of Mockup100 WP Pro add-on (one-time lifetime purchase, $49 single site / $99 unlimited sites).</p>
-          </div>
-          <footer class="mockup100-modal__footer">
-            <button type="button" class="button" data-role="cancel-export">Cancel</button>
-            <a class="button button-primary" data-role="export-promo-cta" href="#" target="_blank" rel="noopener">Get WP Pro</a>
-          </footer>
         </div>
       </div>
       <div class="mockup100-modal-backdrop" data-role="results-modal" hidden>
@@ -755,24 +736,6 @@
     if (next >= views.length) next = 0
     state.viewPreview.activeView = views[next]
     renderViewPreviewDialog()
-  }
-
-  // === Pro Promo Modal (was: Export Modal) ===
-  // 0.5.0 (Trialware-free Free Plugin §7.1):
-  // 批量订单导出在免费版仅保留入口 + 弹窗指向 WP Pro 售卖页,
-  // 不含任何批量执行代码。原 runExport 三层循环及 submitDesign('export') 调用已删除。
-  function openExportDialog() {
-    state.exportModal.open = true
-    const modal = root.querySelector('[data-role="export-modal"]')
-    if (modal) modal.hidden = false
-    const cta = root.querySelector('[data-role="export-promo-cta"]')
-    if (cta) cta.setAttribute('href', PRO_STOREFRONT_URL)
-  }
-
-  function closeExportDialog() {
-    state.exportModal.open = false
-    const modal = root.querySelector('[data-role="export-modal"]')
-    if (modal) modal.hidden = true
   }
 
   // === Results Modal ===
@@ -2171,8 +2134,7 @@
           '<div style="line-height:1.6;color:#333;font-size:14px;">' +
             '<p style="margin:0 0 12px 0;"><strong>原因:</strong>平台租户的 token 余额已耗尽,无法继续生成预览/合成。</p>' +
             '<p style="margin:0 0 12px 0;"><strong>处理:</strong>请联系本站点管理员到 ' +
-              '<a href="' + escapeHtml(TOKEN_RECHARGE_URL) + '" target="_blank" rel="noopener">Mockup100 控制台</a>' +
-              ' 购买 token 包后再试。</p>' +
+              '站点管理员恢复 Mockup100 服务配额后再试。</p>' +
             '<p style="margin:0;color:#888;font-size:12px;">提示:此费用由站点运营方承担,与您的购物结算无关。</p>' +
             (detailMessage ? '<p style="margin:12px 0 0 0;color:#999;font-size:11px;">技术详情:' + escapeHtml(String(detailMessage)) + '</p>' : '') +
           '</div>' +
@@ -2734,8 +2696,6 @@
     // === Modal triggers ===
     const openVPBtn = root.querySelector('[data-role="open-view-preview"]')
     if (openVPBtn) openVPBtn.addEventListener('click', () => openViewPreviewDialog())
-    const openExportBtn = root.querySelector('[data-role="open-export"]')
-    if (openExportBtn) openExportBtn.addEventListener('click', () => openExportDialog())
     const openResultsBtn = root.querySelector('[data-role="open-results"]')
     if (openResultsBtn) openResultsBtn.addEventListener('click', () => openResultsDialog())
 
@@ -2764,18 +2724,6 @@
           const viewSelect = root.querySelector('[data-role="view"]')
           if (viewSelect) viewSelect.value = state.viewPreview.activeView
           renderViewPreviewDialog()
-        }
-      })
-    }
-
-    // Export promo modal events (Pro upsell only — no batch logic in WP free)
-    const exportModal = root.querySelector('[data-role="export-modal"]')
-    if (exportModal) {
-      exportModal.addEventListener('click', (event) => {
-        if (event.target === exportModal) { closeExportDialog(); return }
-        if (event.target.closest('[data-role="close-export"]') || event.target.closest('[data-role="cancel-export"]')) {
-          closeExportDialog()
-          return
         }
       })
     }
