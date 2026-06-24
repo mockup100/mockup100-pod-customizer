@@ -2,9 +2,9 @@
 Contributors: mockup100
 Tags: print on demand, pod, product designer, mockup generator, woocommerce
 Requires at least: 6.0
-Tested up to: 6.7
+Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 0.5.8
+Stable tag: 0.5.10
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -45,6 +45,8 @@ All custom-generated frontend assets shipped in this plugin have matching, human
 2. `assets/js/mockup100-editor.umd.js`, `assets/js/mockup100-editor.iife.js`, and `assets/css/mockup100-editor.css` are built from `./src/wordpress-editor/pod-customizer/index.ts` via `./vite.config.wordpress.ts`.
 3. `assets/js/vue.global.js` is the upstream vendored Vue 3 global runtime, copied from `node_modules/vue/dist/vue.global.prod.js`.
 
+The wp.org release zip intentionally ships the minimum file set needed to study and rebuild the generated frontend assets. It includes the `src/` tree, package manifests, Vite config, `scripts/build-frontend.mjs`, and the reproducibility docs. Development-only helpers such as packaging shell scripts and local PHP test stubs remain available in the public GitHub repository, but are not part of the runtime distribution package reviewed by WordPress.org.
+
 To rebuild the editor bundle locally:
 
 1. Install Node.js 18+ and npm.
@@ -52,7 +54,7 @@ To rebuild the editor bundle locally:
 3. Run `npm run build` to regenerate the shipped `assets/js/*` and `assets/css/*` files.
 4. Run `npm run build:wordpress` if you want to inspect the standalone WordPress bundle output under `dist-wordpress/`.
 
-The release zip produced by `bash scripts/package-plugin.sh` ships the compiled output, the `./src/` source tree, `package.json`, `package-lock.json`, `vite.config.wordpress.ts`, and `scripts/build-frontend.mjs` so that WordPress.org reviewers can rebuild the custom-generated assets from the same package they review. See `docs/BUILD.md` for the full reproducibility checklist and `docs/THIRD-PARTY-NOTICES.md` for vendored library attribution (Vue 3, fabric.js).
+The release zip produced for WordPress.org ships the compiled output, the `./src/` source tree, `package.json`, `package-lock.json`, `vite.config.wordpress.ts`, `scripts/build-frontend.mjs`, and the reproducibility docs so that reviewers can rebuild the custom-generated assets from the same package they review. See `docs/BUILD.md` for the exact reproducibility checklist and `docs/THIRD-PARTY-NOTICES.md` for vendored library attribution (Vue 3, fabric.js).
 
 == External Services ==
 
@@ -70,18 +72,18 @@ This plugin communicates with the Mockup100 SaaS platform to render print-on-dem
 
 Please review the linked terms and privacy policy before enabling the service for your site.
 
-== Optional Paid Mockup100 Services ==
+== Optional Mockup100 Services ==
 
 The free plugin itself is fully usable without paying anything: bind templates, run the designer, generate single-size mockup previews, add the configured product to cart, and write template / job / output metadata to WooCommerce orders all work for free.
 
 Some advanced workflows rely on optional external Mockup100 services. Free users can keep using the rest of the designer; if an optional external service is unavailable for the current account, the SaaS endpoint returns the error and the free plugin itself does NOT contain any license-key check or local paywall gate.
 
 * **Grading workspace** — opens the optional Mockup100 grading service for multi-size pattern output generation. Service access is managed on mockup100.com, outside this plugin. Endpoint: `https://www.mockup100.com/api/v1/runtime/templates/{id}/grading/compose`.
-* **Order edit page Grading entry** — adds a "Generate Grading Sizes" button next to each Mockup100-bound order line item. Visible only to users with the `edit_shop_orders` capability. The first click shows a browser confirmation dialog disclosing the destination domain (`https://www.mockup100.com`) and the fields that will be sent (template id, part keys); no request leaves the site until the user explicitly accepts. Site administrators can disable this entry and its REST route at any time under `Mockup100 > Settings > Order Grading Entry`. Endpoint: `https://www.mockup100.com/api/v1/external/runtime/templates/{id}/grading/compose`.
-* **Cloud token service page** — opens `https://www.mockup100.com/pricing#tokens` so the site administrator can review optional token packages used for HD render output and premium artwork licensing. The 512 px preview render remains free for all users.
+* **Order edit page Grading entry** — adds a "Generate Grading Sizes" button next to each Mockup100-bound order line item. Visible only to users with the `edit_shop_orders` capability. The first click shows a browser confirmation dialog disclosing the destination domain (`https://www.mockup100.com`) and the fields that will be sent (template id, part keys); no request leaves the site until the user explicitly accepts. If the external service is not currently available for the account, the wp-admin UI only offers a neutral "Open Mockup100 service page" link. Site administrators can disable this entry and its REST route at any time under `Mockup100 > Settings > Order Grading Entry`. Endpoint: `https://www.mockup100.com/api/v1/external/runtime/templates/{id}/grading/compose`.
+* **Cloud token service page** — opens `https://www.mockup100.com/pricing#tokens` so the site administrator can review the optional external token service used for HD render output and premium artwork licensing. The 512 px preview render remains free for all users.
 * **WordPress Pro Add-on** — a separate, separately-distributed paid WordPress plugin (`mockup100-pod-customizer-pro`) for bulk order export and team permissions. It is NOT bundled in this free plugin, is never required for the free features to work, and no part of that paid plugin is shipped, downloaded, auto-activated, or invoked by this free plugin.
 
-All four are 100% optional. Clicking any of them performs an explicit user action (opening an external Mockup100 page, or invoking a Mockup100 SaaS endpoint that is already disclosed under "External Services" above). You only pay if you actively complete a purchase / subscription on mockup100.com.
+All four are 100% optional. Clicking any of them performs an explicit user action (opening an external Mockup100 page, or invoking a Mockup100 SaaS endpoint that is already disclosed under "External Services" above). Any purchase happens only on mockup100.com, outside this plugin.
 
 == Privacy & GDPR ==
 
@@ -128,6 +130,15 @@ Screenshot files are tracked under `assets/screenshots/` in the source repositor
 
 == Changelog ==
 
+= 0.5.10 =
+* Final WordPress.org resubmission package refresh: keep the review-ready free-plugin codebase aligned with the latest embedded editor bundle, source disclosure, external-service documentation, and release packaging checks in one publishable build.
+* Soften remaining service wording in the readme and wp-admin settings so optional external services are described as off-site Mockup100 services, not in-plugin locked features.
+
+= 0.5.9 =
+* Refresh the WordPress.org resubmission package with the current review-ready codebase and source bundle, keeping the slug/name disclosure, external-service documentation, security hardening, and build reproducibility assets aligned in one uploadable release.
+* Update the embedded WordPress preview workspace to prefer PNG part exports when available, improving compatibility with the current runtime compose pipeline used by the mirrored editor bundle.
+* Narrow the WordPress.org release zip to the minimum rebuildable source set: keep `src/`, package manifests, Vite config, `scripts/build-frontend.mjs`, and docs, while leaving packaging/test helper scripts in the public GitHub repository instead of the distributed plugin archive.
+
 = 0.5.8 =
 * Rework build reproducibility for WordPress.org review: the custom `mockup100-editor.umd.js` / `mockup100-editor.iife.js` bundle source now lives in this same plugin repository under `src/wordpress-editor/`, with `vite.config.wordpress.ts`, `package.json`, `package-lock.json`, and `scripts/build-frontend.mjs` documented and shipped together.
 * Fix WordPress.org review items: move the product-page variation button script to `assets/js/product-design-button.js`, replace remaining wp-admin inline style attributes with `wp_add_inline_style()`, and remove single-binding wording from the product binding UI.
@@ -135,8 +146,8 @@ Screenshot files are tracked under `assets/screenshots/` in the source repositor
 * Correct metadata and disclosure: restore `Tested up to: 6.7`, bump `Stable tag` to `0.5.8`, reiterate the requested slug rename to `mockup100-pod-customizer`, and clarify that the WordPress Pro add-on is distributed separately outside WordPress.org.
 
 = 0.5.7 =
-* Add a wp-admin order edit page entry point for the optional Mockup100 Grading SaaS feature, designed against the WordPress.org plugin guidelines (no phoning home without disclosure, no admin hijack, no in-plugin paywall, full External Services disclosure, and a site-level kill switch).
-    * New side meta box "Mockup100 Grading (optional add-on)" registered on classic `shop_order` and HPOS (`woocommerce_page_wc-orders`) screens, only for users with the `edit_shop_orders` capability. The meta box lists each Mockup100-bound order line item and provides a neutral "Generate Grading Sizes" button — no lock icons, no price tags, no "Pro" badges in the wp-admin chrome.
+* Add a wp-admin order edit page entry point for the optional Mockup100 Grading external service, designed against the WordPress.org plugin guidelines (no phoning home without disclosure, no admin hijack, no in-plugin paywall, full External Services disclosure, and a site-level kill switch).
+    * New side meta box "Mockup100 Grading" registered on classic `shop_order` and HPOS (`woocommerce_page_wc-orders`) screens, only for users with the `edit_shop_orders` capability. The meta box lists each Mockup100-bound order line item and provides a neutral "Generate Grading Sizes" button — no lock icons, no price tags, no "Pro" badges in the wp-admin chrome.
     * The first click triggers a browser confirmation dialog that explicitly discloses the destination (`https://www.mockup100.com` Grading API) and the fields to be sent (template id, part keys). Nothing leaves the site until the user accepts; on accept, the user-level consent is recorded in `_mockup100_grading_external_consent` user_meta so the dialog is shown only once per operator.
     * New REST route `POST /wp-json/mockup100/v1/order/{id}/grading/compose` proxies the request through `Mockup100_Api_Proxy::compose_grading()` (server-to-server, tenant API key never reaches the browser). Service-access checks remain on the Mockup100 SaaS side: if the external grading service is unavailable for the current account, the wp-admin UI shows a neutral "Open Mockup100 service page" link. The plugin code itself contains no license-key check.
     * New site-level kill switch `Mockup100 > Settings > Order Grading Entry` (option `mockup100_order_grading_enabled`, default on). When unticked, the meta box is not registered and the REST route returns `feature_disabled`, allowing administrators to fully sever the SaaS dependency at any time.

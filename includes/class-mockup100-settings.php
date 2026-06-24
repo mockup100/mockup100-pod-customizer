@@ -275,7 +275,7 @@ class Mockup100_Settings {
         echo '<input type="checkbox" name="' . esc_attr(self::OPTION_ORDER_GRADING_ENABLED) . '" value="1" ' . checked($checked, true, false) . ' /> ';
         echo esc_html__('Show "Generate Grading Sizes" entry on WooCommerce order edit pages', 'mockup100-pod-customizer');
         echo '</label>';
-        echo '<p class="description">' . esc_html__('Adds a side-panel meta box to wp-admin order pages that lets shop managers send a single line item\'s design metadata (template id, part keys) to the Mockup100 Grading API after explicit consent. Grading itself is an optional Mockup100 SaaS subscription billed by Mockup100. Disable this checkbox to remove the meta box and the matching REST route entirely.', 'mockup100-pod-customizer') . '</p>';
+        echo '<p class="description">' . esc_html__('Adds a side-panel meta box to wp-admin order pages that lets shop managers send a single line item\'s design metadata (template id, part keys) to the Mockup100 Grading API after explicit consent. Grading access is managed on mockup100.com, outside this plugin. Disable this checkbox to remove the meta box and the matching REST route entirely.', 'mockup100-pod-customizer') . '</p>';
     }
 
     public function enqueue_settings_assets(string $hook): void {

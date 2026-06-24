@@ -1,6 +1,7 @@
 <template>
-  <div v-if="open" class="grading-modal-overlay" @click.self="handleCancel">
-    <div class="grading-modal" @pointerdown.stop @mousedown.stop @click.stop>
+  <Teleport to="body">
+    <div v-if="open" class="grading-modal-overlay" @click.self="handleCancel">
+      <div class="grading-modal" @pointerdown.stop @mousedown.stop @click.stop>
       <div class="grading-modal-header">
         <h3 class="grading-modal-title">{{ t("gradingTitle") }}</h3>
         <button type="button" class="grading-modal-close" @click="handleCancel">×</button>
@@ -247,17 +248,18 @@
           </button>
         </template>
       </div>
+      </div>
+      <div
+        v-if="lightboxUrl"
+        class="grading-lightbox-overlay"
+        data-testid="grading-lightbox"
+        @click.self="closeLightbox"
+      >
+        <button type="button" class="grading-lightbox-close" @click="closeLightbox">×</button>
+        <img :src="lightboxUrl" :alt="lightboxAlt" class="grading-lightbox-image" />
+      </div>
     </div>
-    <div
-      v-if="lightboxUrl"
-      class="grading-lightbox-overlay"
-      data-testid="grading-lightbox"
-      @click.self="closeLightbox"
-    >
-      <button type="button" class="grading-lightbox-close" @click="closeLightbox">×</button>
-      <img :src="lightboxUrl" :alt="lightboxAlt" class="grading-lightbox-image" />
-    </div>
-  </div>
+  </Teleport>
 </template>
 
 <script setup lang="ts">
@@ -884,7 +886,7 @@ onBeforeUnmount(() => {
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 1200;
+  z-index: 11000;
 }
 
 .grading-modal {

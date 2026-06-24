@@ -173,6 +173,12 @@ class Mockup100_Rest_Controller {
     public function boot(): void {}
 }
 
+class Mockup100_Order_Grading {
+    public function __construct($api_proxy, $settings) {}
+
+    public function boot(): void {}
+}
+
 class WC_Product {
     private int $id;
     private bool $variable;

@@ -136,6 +136,9 @@ mkdir -p "$PACKAGE_DIR"
     --exclude='./README.md' \
     --exclude='./node_modules' \
     --exclude='./tests' \
+    --exclude='./scripts/package-plugin.sh' \
+    --exclude='./scripts/test-rest-controller.php' \
+    --exclude='./scripts/test-settings-and-binding.php' \
     --exclude='./phpunit.xml' \
     --exclude='./phpunit.xml.dist' \
     -cf - . | (cd "$PACKAGE_DIR" && tar -xf -)
@@ -144,6 +147,12 @@ mkdir -p "$PACKAGE_DIR"
 # 0.5.1 (WP review §3.6): 防御性兜底 — 即便当前 Free 仓库内本无 wp-pro-addon 目录,
 # 仍在 staging 内强制清理一次,确保任何意外混入的付费拓展代码绝不会出现在开源 zip。
 find "$PACKAGE_DIR" -type d -name 'wp-pro-addon' -prune -exec rm -rf {} +
+
+# wp.org 发行包只保留最小可重建入口 scripts/build-frontend.mjs。
+# 其余 scripts/* (本地 harness / package helper / PHP test stubs) 留在公开仓库即可。
+if [[ -d "$PACKAGE_DIR/scripts" ]]; then
+  find "$PACKAGE_DIR/scripts" -mindepth 1 ! -name 'build-frontend.mjs' -exec rm -rf {} +
+fi
 
 (
   cd "$DIST_DIR"
@@ -173,7 +182,8 @@ if [[ "$ZIP_HEADER_VER" != "$PLUGIN_VERSION" || "$ZIP_DEFINE_VER" != "$PLUGIN_VE
 fi
 
 # 0.5.1 (WP review §3.6 / §7 GPL): zip 内容完整性校验 — 必须包含 readme.txt、可读 src/ 源码、
-# docs/BUILD.md 构建说明,确保审核方能重现 assets/js + assets/css。任一缺失视为打包失败。
+# docs/BUILD.md 构建说明,以及最小可执行的前端构建入口 scripts/build-frontend.mjs,确保审核方能
+# 重现 assets/js + assets/css。测试桩和 shell 打包器保留在公开仓库,不进入 wp.org 发行包。
 # 0.5.2 (Plugin Check unexpected_markdown_file fix): BUILD.md / THIRD-PARTY-NOTICES.md
 # 已从插件根迁至 docs/ 子目录,白名单条目同步更新。
 ZIP_LISTING="$(unzip -l "$ZIP_PATH")"
@@ -189,6 +199,19 @@ for required in \
 do
   if ! grep -qE "[[:space:]]${required//./\\.}" <<< "$ZIP_LISTING"; then
     echo "Zip content check failed: missing required entry '$required'" >&2
+    exit 1
+  fi
+done
+
+# wp.org 发行包只保留最小可重建文件集合,不包含开发态 test/package helper。
+for forbidden in \
+  "$PACKAGE_NAME/scripts/package-plugin.sh" \
+  "$PACKAGE_NAME/scripts/serve-harness.mjs" \
+  "$PACKAGE_NAME/scripts/test-rest-controller.php" \
+  "$PACKAGE_NAME/scripts/test-settings-and-binding.php"
+do
+  if grep -qE "[[:space:]]${forbidden//./\\.}" <<< "$ZIP_LISTING"; then
+    echo "Zip content check failed: forbidden development helper '$forbidden' detected inside release zip" >&2
     exit 1
   fi
 done

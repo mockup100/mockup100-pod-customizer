@@ -68,7 +68,7 @@ class Mockup100_Order_Grading
         foreach (array_unique($screens) as $screen) {
             add_meta_box(
                 self::META_BOX_ID,
-                __('Mockup100 Grading (optional add-on)', 'mockup100-pod-customizer'),
+                __('Mockup100 Grading', 'mockup100-pod-customizer'),
                 [$this, 'render_meta_box'],
                 $screen,
                 'side',
@@ -123,7 +123,7 @@ class Mockup100_Order_Grading
         echo '</p>';
         if ($grading_url !== '') {
             echo '<p><a href="' . esc_url($grading_url) . '" target="_blank" rel="noopener">'
-                . esc_html__('Subscription details (opens mockup100.com)', 'mockup100-pod-customizer')
+                . esc_html__('Service details (opens mockup100.com)', 'mockup100-pod-customizer')
                 . '</a></p>';
         }
 
@@ -212,7 +212,7 @@ class Mockup100_Order_Grading
                 'subscribe' => __('Open Mockup100 service page', 'mockup100-pod-customizer'),
                 'inProgress' => __('Sending request to Mockup100 Grading…', 'mockup100-pod-customizer'),
                 'success' => __('Grading sizes generated. Open Mockup100 to download the bundle.', 'mockup100-pod-customizer'),
-                'subscriptionRequired' => __('Mockup100 Grading service access is required for this feature.', 'mockup100-pod-customizer'),
+                'subscriptionRequired' => __('This optional Mockup100 Grading service is not currently available for this account.', 'mockup100-pod-customizer'),
                 'failurePrefix' => __('Grading failed: ', 'mockup100-pod-customizer'),
             ],
         ]);

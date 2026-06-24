@@ -4,7 +4,7 @@
  * Plugin Name: Mockup100 Print-on-Demand Customizer for WooCommerce
  * Plugin URI: https://www.mockup100.com/
  * Description: Mockup100 Print-on-Demand customizer for WooCommerce. Bind store products to Mockup100 templates and launch a live design workspace from product pages.
- * Version: 0.5.8
+ * Version: 0.5.10
  * Author: Mockup100
  * Requires at least: 6.0
  * Requires PHP: 7.4
@@ -17,7 +17,7 @@ if (! defined('ABSPATH')) {
     exit;
 }
 
-define('MOCKUP100_POD_CUSTOMIZER_PLUGIN_VERSION', '0.5.8');
+define('MOCKUP100_POD_CUSTOMIZER_PLUGIN_VERSION', '0.5.10');
 define('MOCKUP100_POD_CUSTOMIZER_PLUGIN_FILE', __FILE__);
 define('MOCKUP100_POD_CUSTOMIZER_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('MOCKUP100_POD_CUSTOMIZER_PLUGIN_URL', plugin_dir_url(__FILE__));

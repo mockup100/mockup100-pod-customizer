@@ -1,6 +1,6 @@
 {
   "name": "mockup100-pod-customizer",
-  "version": "0.5.8",
+  "version": "0.5.10",
   "private": true,
   "type": "module",
   "description": "Build helpers for the Mockup100 Print-on-Demand Customizer for WooCommerce WordPress plugin",

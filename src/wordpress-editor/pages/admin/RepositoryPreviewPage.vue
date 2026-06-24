@@ -2138,8 +2138,8 @@
                 :key="color"
                 type="button"
                 class="preview-dialog-color-chip preview-dialog-color-chip--labeled"
-                :class="{ active: selectedColor === color }"
-                :aria-pressed="selectedColor === color"
+                :class="{ active: activePreviewDialogColor === color }"
+                :aria-pressed="activePreviewDialogColor === color"
                 :title="color"
                 @click="handleDialogColorSelection(color)"
               >
@@ -2150,14 +2150,14 @@
             <button
               type="button"
               class="preview-main-image-button preview-main-image-button--header"
-              :class="{ 'preview-main-image-button--active': selectedViewIsDraftMainImage }"
-              :disabled="!canSetSelectedPreviewAsDraftMainImage"
+              :class="{ 'preview-main-image-button--active': activePreviewDialogIsDraftMainImage }"
+              :disabled="!canSetActivePreviewAsDraftMainImage"
               @click="setSelectedPreviewAsDraftMainImage"
             >
               <svg viewBox="0 0 16 16" fill="none" aria-hidden="true">
                 <path d="M8 1.5l1.854 3.756 4.146.603-3 2.925.708 4.133L8 10.968l-3.708 1.949.708-4.133-3-2.925 4.146-.603L8 1.5z" fill="currentColor" />
               </svg>
-              <span>{{ selectedViewIsDraftMainImage ? t("draftMainImageSelected") : t("setDraftMainImage") }}</span>
+              <span>{{ activePreviewDialogIsDraftMainImage ? t("draftMainImageSelected") : t("setDraftMainImage") }}</span>
             </button>
             <button type="button" class="workspace-modal-close" @click="closeViewPreviewDialog">×</button>
           </div>
@@ -2165,12 +2165,12 @@
         <div class="workspace-modal-body workspace-modal-body--preview-view">
           <div class="preview-dialog-meta preview-dialog-meta--header preview-dialog-meta--viewer">
             <div class="preview-dialog-meta-primary">
-              <strong>{{ selectedView || "-" }}</strong>
-              <span>{{ selectedColor || "-" }}</span>
+              <strong>{{ activePreviewDialogView || "-" }}</strong>
+              <span>{{ activePreviewDialogColor || "-" }}</span>
             </div>
             <div class="preview-dialog-meta-secondary">
               <span>{{ openPreviewSizeLabel }}</span>
-              <span v-if="selectedViewIsDraftMainImage" class="preview-dialog-main-view-chip">
+              <span v-if="activePreviewDialogIsDraftMainImage" class="preview-dialog-main-view-chip">
                 <svg viewBox="0 0 16 16" fill="none" aria-hidden="true">
                   <path d="M8 1.5l1.854 3.756 4.146.603-3 2.925.708 4.133L8 10.968l-3.708 1.949.708-4.133-3-2.925 4.146-.603L8 1.5z" fill="currentColor" />
                 </svg>
@@ -2195,7 +2195,7 @@
                       <span class="preview-dialog-loading-badge">{{ t("renderingPreviewBadge") }}</span>
                       <div class="progress-spinner preview-dialog-loading-spinner"></div>
                       <strong class="preview-dialog-loading-title">
-                        {{ formatPreviewMessage("renderingPreviewTitle", { view: selectedView || "-" }) }}
+                        {{ formatPreviewMessage("renderingPreviewTitle", { view: activePreviewDialogView || "-" }) }}
                       </strong>
                       <span class="preview-dialog-loading-text">{{ t("renderingPreviewHint") }}</span>
                     </div>
@@ -2203,7 +2203,7 @@
                   <img
                     v-else-if="previewDialogImage && !previewDialogFailedEntries.has(activePreviewDialogLoadKey)"
                     :src="previewDialogImage"
-                    :alt="`${selectedColor}-${selectedView}`"
+                    :alt="`${activePreviewDialogColor}-${activePreviewDialogView}`"
                     class="preview-dialog-image"
                     :style="activePreviewDialogImageStyle"
                     @load="cachePreviewImageNaturalSize(activePreviewDialogLoadKey, $event)"
@@ -2240,22 +2240,22 @@
                   type="button"
                   class="preview-dialog-thumb"
                   :class="{
-                    active: entry.view === selectedView,
+                    active: entry.view === activePreviewDialogView,
                     'preview-dialog-thumb--main': isPreviewDialogMainView(entry.view),
                   }"
-                  :aria-pressed="entry.view === selectedView"
-                  @click="handleViewSelection(entry.view)"
+                  :aria-pressed="entry.view === activePreviewDialogView"
+                  @click="handleDialogViewSelection(entry.view)"
                 >
                   <img
                     v-if="entry.url && !previewDialogFailedEntries.has(entry.loadKey)"
                     :src="entry.url"
-                    :alt="`${selectedColor}-${entry.view}`"
+                    :alt="`${activePreviewDialogColor}-${entry.view}`"
                     class="preview-dialog-thumb-image"
                   />
                   <span
                     v-else
                     class="preview-dialog-thumb-placeholder"
-                    :class="{ 'preview-dialog-thumb-placeholder--loading': entry.view === selectedView && isActivePreviewDialogLoading }"
+                    :class="{ 'preview-dialog-thumb-placeholder--loading': entry.view === activePreviewDialogView && isActivePreviewDialogLoading }"
                   >
                     {{ entry.view }}
                   </span>
@@ -2270,7 +2270,7 @@
                   </span>
                   <span class="preview-dialog-thumb-copy">
                     <span class="preview-dialog-thumb-label">{{ entry.view }}</span>
-                    <span v-if="entry.view === selectedView" class="preview-dialog-thumb-status">{{ t("currentSelection") }}</span>
+                    <span v-if="entry.view === activePreviewDialogView" class="preview-dialog-thumb-status">{{ t("currentSelection") }}</span>
                   </span>
                 </button>
               </div>
@@ -3727,6 +3727,7 @@ const PREVIEW_I18N = {
     insufficientTokensClose: "Got it",
     grading: "Grading",
     gradingMissing: "No grading assets uploaded for this template",
+    requestTimedOutRetry: "Request timed out. Please try again.",
   },
   zh: {
     undo: "撤销",
@@ -4162,6 +4163,7 @@ const PREVIEW_I18N = {
     insufficientTokensClose: "我知道了",
     grading: "放码",
     gradingMissing: "该模板未上传放码资源",
+    requestTimedOutRetry: "请求超时，请重试。",
   },
 } as const
 
@@ -4375,7 +4377,7 @@ function handlePreviewError(error: unknown, fallback: (message: string) => void)
     insufficientTokensModalOpen.value = true
     return
   }
-  fallback(String((error as Error)?.message || error || ""))
+  fallback(resolvePreviewRequestErrorMessage(error))
 }
 const isRendering = ref(false)
 const isBatchExporting = ref(false)
@@ -4482,6 +4484,8 @@ const lastServerActiveDraftId = ref("")
 // View Preview 弹窗里的"主图标志"也能从持久化的 preferences 准确还原。
 const mainPreviewView = ref("")
 const mainPreviewColor = ref("")
+const previewDialogView = ref("")
+const previewDialogColor = ref("")
 const copyPartSelectedTargets = ref<string[]>([])
 const clearMenuOpen = ref(false)
 const imageContextMenu = ref<ImageContextMenuPayload | null>(null)
@@ -4493,6 +4497,8 @@ const skipBeforeUnloadUntil = ref(0)
 // 用单独 flag 在 markPreviewDirty 时设 true,在 submitPlaceOrder 成功后置 false。
 const wpShellEditorDirty = ref(false)
 const previewOutputs = ref<Record<string, { url: string; filePath: string; mode: PreviewSourceMode; signature: string }>>({})
+const previewRequestStateByKey = ref<Record<string, "idle" | "rendering" | "fresh" | "stale" | "failed">>({})
+const previewLastResolvedSignatureByKey = ref<Record<string, string>>({})
 const isPreviewRendering = ref(false)
 const previewMode = ref<PreviewSourceMode>("default")
 const canvasSignature = ref("")
@@ -4599,8 +4605,12 @@ const licensedArtworkPage = ref(1)
 const pendingArtworkInsertId = ref("")
 let previewImageLoader: HTMLImageElement | null = null
 let previewDialogPreloadToken = 0
+let previewDialogWarmToken = 0
+const previewPartImageSnapshotCache = new Map<string, Promise<PreviewPartImage[]>>()
+const previewComposeRequestCache = new Map<string, Promise<PreviewComposeResult | null>>()
 const PREVIEW_SIZE = "512x512"
 const OPEN_PREVIEW_SIZE = PREVIEW_SIZE
+const OPEN_PREVIEW_THUMB_SIZE = "256x256"
 const STANDARD_BATCH_SIZES = ["512x512", "1024x1024", "2048x2048", "4096x4096"] as const
 const imageTileModeOptionSeeds: Array<{
   value: ImageTileMode
@@ -4669,6 +4679,28 @@ function t(key: keyof typeof PREVIEW_I18N.en) {
   const dict = PREVIEW_I18N[selectedLocale.value] as Record<string, string>
   const fallback = PREVIEW_I18N.en as Record<string, string>
   return dict[key as string] || fallback[key as string]
+}
+
+function resolveUnknownErrorMessage(error: unknown) {
+  return String((error as Error)?.message || error || "").trim()
+}
+
+function isAbortLikeError(error: unknown) {
+  const name = typeof error === "object" && error !== null && "name" in error
+    ? String((error as { name?: unknown }).name || "")
+    : ""
+  const message = resolveUnknownErrorMessage(error).toLowerCase()
+  return name === "AbortError"
+    || message.includes("signal is aborted")
+    || message.includes("aborted without reason")
+    || message.includes("request aborted")
+}
+
+function resolvePreviewRequestErrorMessage(error: unknown) {
+  if (isAbortLikeError(error)) {
+    return t("requestTimedOutRetry")
+  }
+  return resolveUnknownErrorMessage(error)
 }
 
 function normalizeArtworkUploadError(raw: unknown) {
@@ -5553,7 +5585,10 @@ const previewSize = computed(() => {
   const next = normalizeOutputSize(selectedSize.value)
   return previewSizeOptions.value.some((option) => option.value === next) ? next : PREVIEW_SIZE
 })
-const currentViewIndex = computed(() => availableViews.value.findIndex((view) => view === selectedView.value))
+const currentViewIndex = computed(() => {
+  const targetView = viewPreviewModalOpen.value ? activePreviewDialogView.value : selectedView.value
+  return availableViews.value.findIndex((view) => view === targetView)
+})
 const previewShortcutKeysById = Object.fromEntries(
   listVisiblePreviewShortcuts().map((shortcut) => [shortcut.id, shortcut.displayKeys]),
 ) as Record<string, string>
@@ -5650,6 +5685,19 @@ type UnifiedPreviewImageEntry = {
   filePath: string
   cacheKey: string
   loadKey: string
+  status: "idle" | "rendering" | "fresh" | "stale" | "failed"
+}
+
+type PreviewPartImage = {
+  partName: string
+  blob: Blob
+}
+
+type PreviewComposeResult = {
+  response: ComposeResponse
+  url: string
+  filePath: string
+  signature: string
 }
 
 const shouldUseDefaultPreviewFallback = computed(() => previewSize.value === PREVIEW_SIZE)
@@ -5664,6 +5712,31 @@ function resolvePreviewOutputEntry(
   if (activeEntry) return activeEntry
   if (!allowDefaultModeFallback || mode === "default") return null
   return previewOutputs.value[previewKey(color, view, size, "default")] || null
+}
+function resolvePreviewRequestState(
+  color: string,
+  view: string,
+  size: string,
+  mode: PreviewSourceMode,
+  allowDefaultModeFallback = true,
+) {
+  const directKey = previewKey(color, view, size, mode)
+  const directState = previewRequestStateByKey.value[directKey]
+  const directEntry = previewOutputs.value[directKey]
+  const currentSignature = previewSignature(mode)
+  if (directState === "rendering") return "rendering" as const
+  if (directEntry?.signature === currentSignature) return "fresh" as const
+  if (directEntry?.url) return "stale" as const
+  if (!allowDefaultModeFallback || mode === "default") {
+    return directState === "failed" ? "failed" : "idle"
+  }
+  const fallbackKey = previewKey(color, view, size, "default")
+  const fallbackState = previewRequestStateByKey.value[fallbackKey]
+  const fallbackEntry = previewOutputs.value[fallbackKey]
+  if (fallbackState === "rendering") return "rendering" as const
+  if (fallbackEntry?.signature === previewSignature("default")) return "fresh" as const
+  if (fallbackEntry?.url) return "stale" as const
+  return fallbackState === "failed" ? "failed" : "idle"
 }
 function resolveTemplatePreviewFallback(color: string, view: string) {
   return resolveRuntimeAssetUrl(editorPayload.value?.preview_map?.[`${color}::${view}`] || "")
@@ -5759,6 +5832,7 @@ function resolvePreviewImageEntry(
     allowDefaultModeFallback,
   })
   const cacheKey = `${color}::${view}::${size}::${mode}`
+  const status = resolvePreviewRequestState(color, view, size, mode, allowDefaultModeFallback)
   return {
     view,
     color,
@@ -5768,6 +5842,7 @@ function resolvePreviewImageEntry(
     filePath,
     cacheKey,
     loadKey: `${cacheKey}::${url || "missing"}`,
+    status,
   }
 }
 
@@ -5779,6 +5854,28 @@ function resolvePreviewImageEntries(options?: {
   allowTemplateFallback?: boolean
 }) {
   return availableViews.value.map((view) => resolvePreviewImageEntry(view, options))
+}
+
+function resolvePreviewDialogDisplayEntry(view: string, size: string): UnifiedPreviewImageEntry {
+  const entry = resolvePreviewImageEntry(view, {
+    color: activePreviewDialogColor.value,
+    size,
+    mode: openPreviewMode.value,
+    allowDefaultModeFallback: openPreviewMode.value !== "artwork",
+    allowTemplateFallback: true,
+  })
+  if (entry.status !== "stale" && entry.status !== "rendering") {
+    return entry
+  }
+  const fallbackUrl = resolveTemplatePreviewFallback(entry.color, entry.view)
+  if (!fallbackUrl || fallbackUrl === entry.url) {
+    return entry
+  }
+  return {
+    ...entry,
+    url: fallbackUrl,
+    loadKey: `${entry.cacheKey}::${fallbackUrl}`,
+  }
 }
 
 function resolveMainPreviewImage(options?: {
@@ -5808,6 +5905,19 @@ const currentPreviewEntry = computed(() => resolvePreviewImageEntry(selectedView
   allowTemplateFallback: shouldUseDefaultPreviewFallback.value,
 }))
 const currentPreviewCacheKey = computed(() => currentPreviewEntry.value.cacheKey)
+const currentPreviewRequestState = computed(() => resolvePreviewRequestState(
+  selectedColor.value || editorPayload.value?.default_color || availableColors.value[0] || "",
+  selectedView.value || availableViews.value[0] || "",
+  previewSize.value,
+  activePreviewMode(),
+  activePreviewMode() !== "artwork",
+))
+const activePreviewDialogColor = computed(() => (
+  previewDialogColor.value || selectedColor.value || editorPayload.value?.default_color || availableColors.value[0] || ""
+))
+const activePreviewDialogView = computed(() => (
+  previewDialogView.value || selectedView.value || availableViews.value[0] || ""
+))
 const currentPreviewImage = computed(() => {
   const mode = activePreviewMode()
   // 优先使用 previewOutputs 缓存中的最新合成图；只在“没有任何缓存图”时回退到模板原图。
@@ -5831,7 +5941,7 @@ const currentPreviewImage = computed(() => {
     const persistedMainPreview = draftPreviewImageMap.value[activeDraftId.value]
     if (persistedMainPreview) return persistedMainPreview
   }
-  if ((previewDirty.value || isPreviewRendering.value) && displayPreviewImage.value) {
+  if ((currentPreviewRequestState.value === "stale" || currentPreviewRequestState.value === "rendering") && displayPreviewImage.value) {
     return displayPreviewImage.value
   }
   return currentPreviewEntry.value.url
@@ -5865,26 +5975,30 @@ const replaceArtworkLibraryTabs = computed(() => ([
   { key: "licensed" as const, label: resolveReplaceArtworkLibraryTabLabel("licensed") },
   { key: "owned" as const, label: resolveReplaceArtworkLibraryTabLabel("owned") },
 ]))
-const previewDialogEntries = computed(() => resolvePreviewImageEntries({
-  color: selectedColor.value || editorPayload.value?.default_color || availableColors.value[0] || "",
+const previewDialogEntries = computed(() => (
+  availableViews.value.map((view) => resolvePreviewDialogDisplayEntry(view, OPEN_PREVIEW_THUMB_SIZE))
+))
+const previewDialogPersistEntries = computed(() => resolvePreviewImageEntries({
+  color: activePreviewDialogColor.value,
   size: OPEN_PREVIEW_SIZE,
   mode: openPreviewMode.value,
   allowDefaultModeFallback: openPreviewMode.value !== "artwork",
   allowTemplateFallback: true,
 }))
-const hasViewPreviewEntries = computed(() => previewDialogEntries.value.some((entry) => Boolean(entry.url)))
+const hasViewPreviewEntries = computed(() => (
+  Boolean(activePreviewDialogEntry.value?.url) || previewDialogEntries.value.some((entry) => Boolean(entry.url))
+))
 const isPreviewDialogLoading = computed(() => {
   if (!viewPreviewModalOpen.value) return false
   const activeEntry = activePreviewDialogEntry.value
   if (!activeEntry) return false
-  if (activeEntry.url) return false
-  return isPreviewRendering.value
+  return activeEntry.status === "rendering"
 })
-const activePreviewDialogEntry = computed(() => (
-  previewDialogEntries.value.find((entry) => entry.view === selectedView.value)
-  || previewDialogEntries.value[0]
-  || null
-))
+const activePreviewDialogEntry = computed(() => {
+  const view = activePreviewDialogView.value || previewDialogEntries.value[0]?.view || availableViews.value[0] || ""
+  if (!view) return null
+  return resolvePreviewDialogDisplayEntry(view, OPEN_PREVIEW_SIZE)
+})
 const activePreviewDialogKey = computed(() => activePreviewDialogEntry.value?.cacheKey || "")
 const activePreviewDialogLoadKey = computed(() => activePreviewDialogEntry.value?.loadKey || "")
 const previewDialogImage = computed(() => activePreviewDialogEntry.value?.url || "")
@@ -5900,7 +6014,7 @@ const previewResultsSelectionEntries = computed(() => previewDialogEntries.value
   let statusText = selectable ? t("previewResultsReady") : t("previewResultsUnavailable")
   if (exists) {
     statusText = t("previewResultsAlreadyAdded")
-  } else if (entry.view === selectedView.value && selectable) {
+  } else if (entry.view === activePreviewDialogView.value && selectable) {
     statusText = t("previewResultsCurrentView")
   }
   return {
@@ -5910,6 +6024,7 @@ const previewResultsSelectionEntries = computed(() => previewDialogEntries.value
   }
 }))
 const canSetSelectedPreviewAsDraftMainImage = computed(() => Boolean(resolveCurrentSessionDraftId() && selectedView.value))
+const canSetActivePreviewAsDraftMainImage = computed(() => Boolean(resolveCurrentSessionDraftId() && activePreviewDialogView.value))
 const selectedViewIsDraftMainImage = computed(() => {
   if (!selectedView.value) return false
   const currentSessionDraft = resolveCurrentSessionDraftRecord()
@@ -5918,6 +6033,16 @@ const selectedViewIsDraftMainImage = computed(() => {
   const targetColor = mainPreviewColor.value || resolveDraftMainPreviewColor(currentSessionDraft)
   if (!targetColor) return true
   return selectedColor.value === targetColor
+})
+const activePreviewDialogIsDraftMainImage = computed(() => {
+  const view = activePreviewDialogView.value
+  if (!view) return false
+  const currentSessionDraft = resolveCurrentSessionDraftRecord()
+  const targetView = mainPreviewView.value || resolveDraftMainPreviewView(currentSessionDraft)
+  if (view !== targetView) return false
+  const targetColor = mainPreviewColor.value || resolveDraftMainPreviewColor(currentSessionDraft)
+  if (!targetColor) return true
+  return activePreviewDialogColor.value === targetColor
 })
 const canOpenPreviewResultsSelection = computed(() => previewResultsSelectionEntries.value.length > 0)
 const canConfirmPreviewResultsSelection = computed(() => (
@@ -6069,7 +6194,7 @@ function isPreviewDialogMainView(view: string) {
   if (view !== targetView) return false
   const targetColor = mainPreviewColor.value || resolveDraftMainPreviewColor(currentSessionDraft)
   if (!targetColor) return true
-  return selectedColor.value === targetColor
+  return activePreviewDialogColor.value === targetColor
 }
 
 const draftFinishedProductCodeMap = computed(() => resolvePreviewDraftFinishedProductCodeMap({
@@ -8724,6 +8849,272 @@ function previewSignature(mode: PreviewSourceMode) {
   return getPreviewSignature(mode, canvasSignature.value, backgroundSignature)
 }
 
+function setPreviewRequestState(
+  color: string,
+  view: string,
+  size: string,
+  mode: PreviewSourceMode,
+  state: "idle" | "rendering" | "fresh" | "stale" | "failed",
+  signature = "",
+) {
+  const key = previewKey(color, view, size, mode)
+  previewRequestStateByKey.value = {
+    ...previewRequestStateByKey.value,
+    [key]: state,
+  }
+  if (signature) {
+    previewLastResolvedSignatureByKey.value = {
+      ...previewLastResolvedSignatureByKey.value,
+      [key]: signature,
+    }
+  }
+}
+
+function buildPreviewPartImageSnapshotKey(mode: PreviewSourceMode, size: string) {
+  return `${mode}::${size}::${previewSignature(mode)}`
+}
+
+async function exportPreviewPartImages(mode: PreviewSourceMode, size: string): Promise<PreviewPartImage[]> {
+  if (mode !== "artwork" || !hasArtwork.value) return []
+  const snapshotKey = buildPreviewPartImageSnapshotKey(mode, size)
+  const cached = previewPartImageSnapshotCache.get(snapshotKey)
+  if (cached) return await cached
+  const nextPromise = (async () => {
+    const targetSize = normalizeLooseOutputSize(size)
+    const parsedTargetSize = targetSize ? parseOutputSizeValue(targetSize) : null
+    const partPngs = await Promise.race([
+      canvasRef.value?.exportPartPngs?.(parsedTargetSize ? { width: parsedTargetSize.width, height: parsedTargetSize.height } : undefined),
+      new Promise<never>((_, reject) => {
+        window.setTimeout(() => reject(new Error("Preview export timed out.")), PREVIEW_RENDER_TIMEOUT_MS)
+      }),
+    ])
+    if (partPngs?.length) {
+      return partPngs.map((item) => ({
+        partName: item.part_key,
+        blob: item.blob,
+      }))
+    }
+    const partBlobs = await (canvasRef.value?.exportPartBlobs?.(size) || Promise.resolve([]))
+    return partBlobs.map((item) => ({
+      partName: item.partName,
+      blob: item.blob,
+    }))
+  })()
+  previewPartImageSnapshotCache.set(snapshotKey, nextPromise)
+  try {
+    return await nextPromise
+  } catch (error) {
+    previewPartImageSnapshotCache.delete(snapshotKey)
+    throw error
+  }
+}
+
+function buildPreviewComposeFormData(args: {
+  color: string
+  view: string
+  size: string
+  mode: PreviewSourceMode
+  partImages: PreviewPartImage[]
+}) {
+  const form = new FormData()
+  form.append("template_id", selectedTemplateId.value)
+  form.append("selected_color", args.color)
+  form.append("selected_view", args.view)
+  form.append("output_size", args.size)
+  form.append("is_preview", "true")
+  if (shouldUsePublishedRuntime()) {
+    form.append("published_only", "true")
+    if (isStorefrontPreview.value && storefrontSlug.value) {
+      form.append("storefront_slug", storefrontSlug.value)
+    }
+  }
+  form.append("compose_overrides", JSON.stringify(editorPayload.value?.compose_params || {}))
+  if (args.partImages.length) {
+    form.append("part_names", args.partImages.map((item) => item.partName).join(","))
+    args.partImages.forEach((item) => {
+      form.append("part_images", new File([item.blob], `${item.partName}.png`, { type: "image/png" }))
+    })
+  }
+  return form
+}
+
+async function requestPreviewCompose(args: {
+  color: string
+  view: string
+  size: string
+  mode: PreviewSourceMode
+}) {
+  if (!selectedTemplateId.value || !editorPayload.value || !args.color || !args.view) return null
+  const signature = previewSignature(args.mode)
+  const requestKey = `${previewKey(args.color, args.view, args.size, args.mode)}::${signature}`
+  const pending = previewComposeRequestCache.get(requestKey)
+  if (pending) return await pending
+  setPreviewRequestState(args.color, args.view, args.size, args.mode, "rendering", signature)
+  const nextPromise = (async () => {
+    const partImages = await exportPreviewPartImages(args.mode, args.size)
+    if (args.mode === "artwork" && hasArtwork.value && !partImages.length) {
+      setPreviewRequestState(args.color, args.view, args.size, args.mode, "failed", signature)
+      return null
+    }
+    const form = buildPreviewComposeFormData({ ...args, partImages })
+    const controller = new AbortController()
+    const timeoutId = window.setTimeout(
+      () => controller.abort(new Error(t("requestTimedOutRetry"))),
+      PREVIEW_RENDER_TIMEOUT_MS,
+    )
+    try {
+      const response = await gatewayPlatformFetch<ComposeResponse>("/api/v1/runtime/editor/compose", {
+        method: "POST",
+        headers: authStore.authHeaders,
+        body: form,
+        signal: controller.signal,
+      })
+      const output = response.outputs[0]
+      const composeFilePath = resolveComposeOutputFilePath(output)
+      if (!composeFilePath) {
+        setPreviewRequestState(args.color, args.view, args.size, args.mode, "failed", signature)
+        console.warn("[preview] compose returned no usable file_path/preview_url", response)
+        return null
+      }
+      const url = renderFileUrl(composeFilePath)
+      return {
+        response,
+        url,
+        filePath: composeFilePath,
+        signature,
+      } satisfies PreviewComposeResult
+    } catch (error) {
+      setPreviewRequestState(args.color, args.view, args.size, args.mode, "failed", signature)
+      throw error
+    } finally {
+      window.clearTimeout(timeoutId)
+    }
+  })()
+  previewComposeRequestCache.set(requestKey, nextPromise)
+  try {
+    return await nextPromise
+  } finally {
+    if (previewComposeRequestCache.get(requestKey) === nextPromise) {
+      previewComposeRequestCache.delete(requestKey)
+    }
+  }
+}
+
+function commitPreviewComposeResult(args: {
+  color: string
+  view: string
+  size: string
+  mode: PreviewSourceMode
+  url: string
+  filePath: string
+  signature: string
+}) {
+  setPreviewOutput(args.color, args.view, args.size, args.url, args.filePath, args.mode, args.signature)
+  setPreviewRequestState(args.color, args.view, args.size, args.mode, "fresh", args.signature)
+}
+
+function resolvePreviewWarmViewOrder(views: string[], priorityView: string) {
+  const normalizedViews = Array.from(new Set(views.map((view) => String(view || "").trim()).filter(Boolean)))
+  const priorityIndex = normalizedViews.indexOf(priorityView)
+  if (priorityIndex < 0) return normalizedViews
+  const ordered = [priorityView]
+  for (let offset = 1; offset < normalizedViews.length; offset += 1) {
+    const right = normalizedViews[priorityIndex + offset]
+    const left = normalizedViews[priorityIndex - offset]
+    if (right) ordered.push(right)
+    if (left) ordered.push(left)
+  }
+  return ordered
+}
+
+async function ensurePreviewEntryComposed(args: {
+  color: string
+  view: string
+  size: string
+  mode: PreviewSourceMode
+  expectedSignature?: string
+}) {
+  const expectedSignature = args.expectedSignature || previewSignature(args.mode)
+  if (expectedSignature !== previewSignature(args.mode)) return null
+  const state = resolvePreviewRequestState(
+    args.color,
+    args.view,
+    args.size,
+    args.mode,
+    args.mode !== "artwork",
+  )
+  if (state === "fresh" || state === "rendering") return null
+  try {
+    const result = await requestPreviewCompose({
+      color: args.color,
+      view: args.view,
+      size: args.size,
+      mode: args.mode,
+    })
+    if (!result) return null
+    if (result.signature !== expectedSignature || expectedSignature !== previewSignature(args.mode)) return null
+    commitPreviewComposeResult({
+      color: args.color,
+      view: args.view,
+      size: args.size,
+      mode: args.mode,
+      url: result.url,
+      filePath: result.filePath,
+      signature: result.signature,
+    })
+    return result
+  } catch (error) {
+    console.warn("[preview] ensurePreviewEntryComposed failed", error)
+    return null
+  }
+}
+
+async function warmPreviewEntries(args: {
+  color: string
+  size: string
+  mode: PreviewSourceMode
+  priorityView: string
+  views: string[]
+  expectedSignature?: string
+}) {
+  const expectedSignature = args.expectedSignature || previewSignature(args.mode)
+  const runToken = ++previewDialogWarmToken
+  const orderedViews = resolvePreviewWarmViewOrder(args.views, args.priorityView)
+    .filter((view) => view !== args.priorityView)
+    .filter((view) => {
+      const state = resolvePreviewRequestState(args.color, view, args.size, args.mode, args.mode !== "artwork")
+      return state === "idle" || state === "stale"
+    })
+  if (!orderedViews.length) {
+    if (viewPreviewModalOpen.value) {
+      await persistOpenPreviewEntriesIfNeeded()
+    }
+    return
+  }
+  let nextIndex = 0
+  const workerCount = 1
+  const workers = Array.from({ length: workerCount }, () => (async () => {
+    while (nextIndex < orderedViews.length) {
+      if (runToken !== previewDialogWarmToken) return
+      if (expectedSignature !== previewSignature(args.mode)) return
+      const view = orderedViews[nextIndex]
+      nextIndex += 1
+      await ensurePreviewEntryComposed({
+        color: args.color,
+        view,
+        size: args.size,
+        mode: args.mode,
+        expectedSignature,
+      })
+    }
+  })())
+  await Promise.allSettled(workers)
+  if (runToken !== previewDialogWarmToken) return
+  if (expectedSignature !== previewSignature(args.mode)) return
+  if (!viewPreviewModalOpen.value) return
+  await persistOpenPreviewEntriesIfNeeded()
+}
+
 function sanitizeStorageKeySegment(value: string) {
   return String(value || "")
     .trim()
@@ -8886,57 +9277,26 @@ async function renderPreviewForView(
 ) {
   if (!selectedTemplateId.value || !selectedColor.value || !view || !editorPayload.value) return ""
   const requestColor = color || selectedColor.value
-  const requestSignature = previewSignature(mode)
-  const form = new FormData()
-  form.append("template_id", selectedTemplateId.value)
-  form.append("selected_color", requestColor)
-  form.append("selected_view", view)
-  form.append("output_size", size)
-  form.append("is_preview", "true")
-  if (shouldUsePublishedRuntime()) {
-    form.append("published_only", "true")
-    if (isStorefrontPreview.value && storefrontSlug.value) {
-      form.append("storefront_slug", storefrontSlug.value)
-    }
-  }
-  form.append("compose_overrides", JSON.stringify(editorPayload.value?.compose_params || {}))
-  if (mode === "artwork" && hasArtwork.value) {
-    const partBlobs = await Promise.race([
-      canvasRef.value?.exportPartBlobs?.(),
-      new Promise<never>((_, reject) => {
-        window.setTimeout(() => reject(new Error("Preview export timed out.")), PREVIEW_RENDER_TIMEOUT_MS)
-      }),
-    ])
-    if (!partBlobs?.length) {
-      return ""
-    }
-    form.append("part_names", partBlobs.map((item) => item.partName).join(","))
-    partBlobs.forEach((item) => {
-      form.append("part_images", new File([item.blob], `${item.partName}.png`, { type: "image/png" }))
-    })
-  }
-  const controller = new AbortController()
-  const timeoutId = window.setTimeout(() => controller.abort(), PREVIEW_RENDER_TIMEOUT_MS)
   try {
-    const response = await gatewayPlatformFetch<ComposeResponse>("/api/v1/runtime/editor/compose", {
-      method: "POST",
-      headers: authStore.authHeaders,
-      body: form,
-      signal: controller.signal,
+    const result = await requestPreviewCompose({
+      color: requestColor,
+      view,
+      size,
+      mode,
     })
-    const output = response.outputs[0]
-    const composeFilePath = resolveComposeOutputFilePath(output)
-    if (!composeFilePath) {
-      console.warn("[preview] compose returned no usable file_path/preview_url", response)
-      return ""
-    }
-    const url = renderFileUrl(composeFilePath)
-    setPreviewOutput(requestColor, view, size, url, composeFilePath, mode, requestSignature)
-    return url
+    if (!result) return ""
+    commitPreviewComposeResult({
+      color: requestColor,
+      view,
+      size,
+      mode,
+      url: result.url,
+      filePath: result.filePath,
+      signature: result.signature,
+    })
+    return result.url
   } catch {
     return ""
-  } finally {
-    window.clearTimeout(timeoutId)
   }
 }
 
@@ -10859,7 +11219,9 @@ async function renderAndPersistDraftOutputs(args: {
   // 在 WP 买家端（isTenantAdmin=false）加购时，也需要能执行独立渲染，所以去掉 isTenantAdmin.value 的强校验。
   // 但是 draftId 可能为空（买家端没有 draftId），所以 draftId 的校验改为如果需要存服务端记录时再校验。
   if (!selectedTemplateId.value) return
+  const mode = activePreviewMode()
   const designSignature = buildCurrentPreviewCacheDesignSignature()
+  const currentSignature = previewSignature(mode)
   const colors = args.specificColors?.length ? args.specificColors : resolveDraftOutputColors()
   const views = args.specificViews?.length ? args.specificViews : resolveDraftOutputViews()
   if (!colors.length || !views.length || !designSignature) return
@@ -10869,11 +11231,11 @@ async function renderAndPersistDraftOutputs(args: {
     for (const view of views) {
       const reusableEntry = args.forceFresh
         ? null
-        : resolvePreviewOutputEntry(color, view, PREVIEW_SIZE, activePreviewMode(), true)
-      if (reusableEntry?.filePath && reusableEntry.signature === previewSignature(activePreviewMode())) {
+        : resolvePreviewOutputEntry(color, view, PREVIEW_SIZE, mode, true)
+      if (reusableEntry?.filePath && reusableEntry.signature === currentSignature) {
         collected.push({
           id: createOutputId(),
-          mode: activePreviewMode(),
+          mode,
           color,
           view,
           size: PREVIEW_SIZE,
@@ -10886,30 +11248,37 @@ async function renderAndPersistDraftOutputs(args: {
         })
         continue
       }
-      const response = await renderView(view, PREVIEW_SIZE, color)
-      response.outputs.forEach((item) => {
-        const normalizedSize = normalizeLooseOutputSize(String(item.size || (item as Record<string, unknown>).output_size || PREVIEW_SIZE).trim())
-          || PREVIEW_SIZE
-        const itemFilePath = resolveComposeOutputFilePath(item)
-        if (!itemFilePath) {
-          console.warn("[preview] persistDraftOutputs missing file_path/preview_url", item)
-          return
-        }
-        const url = renderFileUrl(itemFilePath)
-        setPreviewOutput(color, view, normalizedSize, url, itemFilePath, activePreviewMode(), previewSignature(activePreviewMode()))
-        collected.push({
-          id: createOutputId(),
-          mode: activePreviewMode(),
-          color,
-          view,
-          size: normalizedSize,
-          filePath: itemFilePath,
-          url,
-          createdAt: new Date().toISOString(),
-          draftId,
-          designSignature,
-          source: "draft_save",
-        })
+      const result = await requestPreviewCompose({
+        color,
+        view,
+        size: PREVIEW_SIZE,
+        mode,
+      })
+      if (!result) continue
+      if (result.signature !== currentSignature || currentSignature !== previewSignature(mode)) {
+        continue
+      }
+      commitPreviewComposeResult({
+        color,
+        view,
+        size: PREVIEW_SIZE,
+        mode,
+        url: result.url,
+        filePath: result.filePath,
+        signature: result.signature,
+      })
+      collected.push({
+        id: createOutputId(),
+        mode,
+        color,
+        view,
+        size: PREVIEW_SIZE,
+        filePath: result.filePath,
+        url: result.url,
+        createdAt: new Date().toISOString(),
+        draftId,
+        designSignature,
+        source: "draft_save",
       })
     }
   }
@@ -10937,6 +11306,7 @@ function setPreviewOutput(color: string, view: string, size: string, url: string
     ...previewOutputs.value,
     [previewKey(color, view, size, mode)]: { url, filePath, mode, signature },
   }
+  setPreviewRequestState(color, view, size, mode, "fresh", signature)
 }
 
 // WP shell 下平台 external API 在 normalizeOutputs 中显式移除了 file_path,
@@ -11014,14 +11384,14 @@ async function persistOpenPreviewEntriesIfNeeded() {
   const draftId = String(activeDraftId.value || "").trim()
   const designSignature = buildCurrentPreviewCacheDesignSignature()
   if (!isTenantAdmin.value || !selectedTemplateId.value || !draftId || !designSignature) return
-  const entries = previewDialogEntries.value
-    .filter((entry) => entry.filePath && entry.url && entry.view)
+  const entries = previewDialogPersistEntries.value
+    .filter((entry) => entry.status === "fresh" && entry.filePath && entry.url && entry.view)
   if (!entries.length) return
   const finishedProductCode = String(currentFinishedProductCode.value || "").trim()
   await Promise.allSettled(entries.map((entry) => persistOutputToServer({
     id: createOutputId(),
     mode: openPreviewMode.value,
-    color: selectedColor.value,
+    color: entry.color,
     view: entry.view,
     size: OPEN_PREVIEW_SIZE,
     filePath: entry.filePath,
@@ -11503,65 +11873,29 @@ async function composeVariantPreview(mode: PreviewSourceMode, reason: PreviewRef
   const renderToken = ++activePreviewRenderToken
   isPreviewRendering.value = true
   try {
-    const form = new FormData()
-    form.append("template_id", selectedTemplateId.value)
-    form.append("selected_color", requestColor)
-    form.append("selected_view", requestView)
-    form.append("output_size", requestSize)
-    form.append("is_preview", "true")
-    if (shouldUsePublishedRuntime()) {
-      form.append("published_only", "true")
-      if (isStorefrontPreview.value && storefrontSlug.value) {
-        form.append("storefront_slug", storefrontSlug.value)
-      }
-    }
-    form.append("compose_overrides", JSON.stringify(editorPayload.value?.compose_params || {}))
-    if (mode === "artwork" && hasArtwork.value) {
-      const partBlobs = await Promise.race([
-        canvasRef.value?.exportPartBlobs?.(),
-        new Promise<never>((_, reject) => {
-          window.setTimeout(() => reject(new Error("Preview export timed out.")), PREVIEW_RENDER_TIMEOUT_MS)
-        }),
-      ])
-      if (!partBlobs?.length) {
+    const response = await requestPreviewCompose({
+      color: requestColor,
+      view: requestView,
+      size: requestSize,
+      mode,
+    })
+    if (!response) {
+      if (mode === "artwork" && hasArtwork.value) {
         previewMode.value = "default"
         return await composeVariantPreview("default", reason)
       }
-      form.append("part_names", partBlobs.map((item) => item.partName).join(","))
-      partBlobs.forEach((item) => {
-        form.append("part_images", new File([item.blob], `${item.partName}.png`, { type: "image/png" }))
-      })
-    }
-    const controller = new AbortController()
-    const timeoutId = window.setTimeout(() => controller.abort(), PREVIEW_RENDER_TIMEOUT_MS)
-    let response: ComposeResponse
-    try {
-      response = await gatewayPlatformFetch<ComposeResponse>("/api/v1/runtime/editor/compose", {
-        method: "POST",
-        headers: authStore.authHeaders,
-        body: form,
-        signal: controller.signal,
-      })
-    } finally {
-      window.clearTimeout(timeoutId)
-    }
-    if (requestSignature !== previewSignature(mode)) return
-    const output = response.outputs[0]
-    if (!output) return
-    const composeFilePath = resolveComposeOutputFilePath(output)
-    if (!composeFilePath) {
-      console.warn("[preview] composeVariantPreview missing file_path/preview_url", response)
       return
     }
-    setPreviewOutput(
-      requestColor,
-      requestView,
-      requestSize,
-      renderFileUrl(composeFilePath),
-      composeFilePath,
+    if (requestSignature !== previewSignature(mode)) return
+    commitPreviewComposeResult({
+      color: requestColor,
+      view: requestView,
+      size: requestSize,
       mode,
-      requestSignature,
-    )
+      url: response.url,
+      filePath: response.filePath,
+      signature: response.signature,
+    })
     const isActiveRequest = (
       requestColor === selectedColor.value
       && requestView === selectedView.value
@@ -11619,7 +11953,7 @@ async function refreshVariantPreview(options?: {
     return
   }
   const mode = activePreviewMode()
-  if (!options?.force && isPreviewCurrent(selectedColor.value, selectedView.value, previewSize.value, mode)) {
+  if (!options?.force && resolvePreviewRequestState(selectedColor.value, selectedView.value, previewSize.value, mode, mode !== "artwork") === "fresh") {
     previewMode.value = mode
     previewDirty.value = false
     return
@@ -12214,65 +12548,87 @@ async function submitPlaceOrder() {
 }
 
 async function ensureOpenPreviewEntries() {
-  if (!viewPreviewModalOpen.value || !selectedTemplateId.value || !selectedColor.value || !selectedView.value) return
+  if (!viewPreviewModalOpen.value || !selectedTemplateId.value) return
+  const color = activePreviewDialogColor.value
+  const view = activePreviewDialogView.value
+  if (!color || !view) return
+  previewDialogWarmToken += 1
+  const expectedColor = color
+  const expectedView = view
   const mode = openPreviewMode.value
-  const existingUrl = resolvePreviewImageForView(selectedView.value, OPEN_PREVIEW_SIZE, {
+  const expectedSignature = previewSignature(mode)
+  await ensurePreviewEntryComposed({
+    color,
+    view,
+    size: OPEN_PREVIEW_SIZE,
     mode,
-    allowDefaultModeFallback: mode !== "artwork",
-    allowTemplateFallback: false,
+    expectedSignature,
   })
-  if (existingUrl || isPreviewRendering.value) return
-  const previousSize = selectedSize.value
-  try {
-    selectedSize.value = OPEN_PREVIEW_SIZE
-    await composeVariantPreview(mode, "manual")
-  } finally {
-    selectedSize.value = previousSize
-  }
+  if (!viewPreviewModalOpen.value) return
+  if (expectedSignature !== previewSignature(mode)) return
+  if (activePreviewDialogColor.value !== expectedColor || activePreviewDialogView.value !== expectedView) return
   await persistOpenPreviewEntriesIfNeeded()
+  void ensurePreviewEntryComposed({
+    color,
+    view,
+    size: OPEN_PREVIEW_THUMB_SIZE,
+    mode,
+    expectedSignature,
+  })
+  void warmPreviewEntries({
+    color,
+    size: OPEN_PREVIEW_THUMB_SIZE,
+    mode,
+    priorityView: view,
+    views: availableViews.value,
+    expectedSignature,
+  })
 }
 
 function openViewPreviewDialog() {
   if (!selectedTemplateId.value || !availableViews.value.length) return
   const mainSelection = resolveMainPreviewSelection()
-  if (mainSelection.color) selectedColor.value = mainSelection.color
-  if (mainSelection.view) selectedView.value = mainSelection.view
+  previewDialogColor.value = selectedColor.value || mainSelection.color || editorPayload.value?.default_color || availableColors.value[0] || ""
+  previewDialogView.value = selectedView.value || mainSelection.view || availableViews.value[0] || ""
   previewDialogPreloadToken += 1
+  previewDialogWarmToken += 1
   viewPreviewModalOpen.value = true
   void ensureOpenPreviewEntries()
-  void persistOpenPreviewEntriesIfNeeded()
 }
 
 function closeViewPreviewDialog() {
   previewDialogPreloadToken += 1
+  previewDialogWarmToken += 1
   viewPreviewModalOpen.value = false
 }
 
 async function setSelectedPreviewAsDraftMainImage() {
   const targetDraftId = resolveCurrentSessionDraftId()
-  if (!targetDraftId || !selectedView.value) return
+  const targetView = activePreviewDialogView.value
+  const targetColor = activePreviewDialogColor.value
+  if (!targetDraftId || !targetView) return
   draftMainPreviewViewOverrides.value = {
     ...draftMainPreviewViewOverrides.value,
-    [targetDraftId]: selectedView.value,
+    [targetDraftId]: targetView,
   }
-  if (selectedColor.value) {
+  if (targetColor) {
     draftMainPreviewColorOverrides.value = {
       ...draftMainPreviewColorOverrides.value,
-      [targetDraftId]: selectedColor.value,
+      [targetDraftId]: targetColor,
     }
   }
   // 0.4.59: 同步 mainPreviewView/Color ref,确保 View Preview 弹窗里的
   // 主图标志立即更新到当前 selectedView/Color(不依赖 activeDraftId 的可见性)。
-  mainPreviewView.value = selectedView.value
-  mainPreviewColor.value = selectedColor.value || ""
-  const dialogPreviewUrl = String(resolveMainPreviewImage({
-    size: OPEN_PREVIEW_SIZE,
+  mainPreviewView.value = targetView
+  mainPreviewColor.value = targetColor || ""
+  const dialogPreviewUrl = String(resolvePreviewImageForView(targetView, OPEN_PREVIEW_SIZE, {
+    color: targetColor,
     mode: openPreviewMode.value,
     allowDefaultModeFallback: openPreviewMode.value !== "artwork",
     allowTemplateFallback: true,
   }) || activePreviewDialogEntry.value?.url || previewDialogImage.value || "").trim()
-  const fallbackTemplatePreview = selectedView.value
-    ? resolveRuntimeAssetUrl(editorPayload.value?.preview_map?.[`${selectedColor.value}::${selectedView.value}`] || "")
+  const fallbackTemplatePreview = targetView
+    ? resolveRuntimeAssetUrl(editorPayload.value?.preview_map?.[`${targetColor}::${targetView}`] || "")
     : ""
   const nextPreviewUrl = dialogPreviewUrl || fallbackTemplatePreview
   // 0.4.66.1: 在内存中立即写入 nextPreviewUrl (哪怕是临时的 job URL)，让当前 session 的卡片缩略图即时更新
@@ -12286,14 +12642,14 @@ async function setSelectedPreviewAsDraftMainImage() {
   // 里 dialogPreviewUrl 是 job-output 临时 URL),主动触发当前主图视角/颜色的
   // renderAndPersistDraftOutputs,等 OSS 落库后用稳定 runtime-assets URL 持久化到 server,
   // 让 Designs 弹窗 / Place Order 弹窗下次打开都能读到最新主图。
-  if (!persistableNextPreviewUrl && selectedView.value && selectedColor.value) {
+  if (!persistableNextPreviewUrl && targetView && targetColor) {
     try {
       const outputs = await renderAndPersistDraftOutputs({
         draftId: targetDraftId,
-        specificColors: [selectedColor.value],
-        specificViews: [selectedView.value],
+        specificColors: [targetColor],
+        specificViews: [targetView],
       })
-      const persisted = outputs?.find((o) => o.color === selectedColor.value && o.view === selectedView.value)
+      const persisted = outputs?.find((o) => o.color === targetColor && o.view === targetView)
       if (persisted?.url && isPersistentPreviewStorageValue(persisted.url)) {
         persistableNextPreviewUrl = persisted.url
         // 同步更新 draftPreviewImageMap,Designs 卡片缩略图立即用稳定 URL
@@ -12310,8 +12666,8 @@ async function setSelectedPreviewAsDraftMainImage() {
   if (isTenantAdmin.value && !isReadOnlyPreview.value) {
     void previewDraftStore.persistActiveDraftMainPreviewSelection({
       draftId: targetDraftId,
-      mainPreviewView: selectedView.value,
-      mainPreviewColor: selectedColor.value || "",
+      mainPreviewView: targetView,
+      mainPreviewColor: targetColor || "",
       previewUrl: persistableNextPreviewUrl,
     })
   } else if (isWordPressShell.value) {
@@ -12942,18 +13298,24 @@ function goToAdjacentView(step: number) {
 
 function handleViewSelection(view: string) {
   selectedView.value = view
+}
+
+function handleDialogViewSelection(view: string) {
+  if (!view || activePreviewDialogView.value === view) return
+  previewDialogWarmToken += 1
+  previewDialogView.value = view
   if (viewPreviewModalOpen.value) {
     void ensureOpenPreviewEntries()
   }
 }
 
 function handleDialogColorSelection(color: string) {
-  if (!color || selectedColor.value === color) return
+  if (!color || activePreviewDialogColor.value === color) return
   if (!availableColors.value.includes(color)) return
-  selectedColor.value = color
+  previewDialogWarmToken += 1
+  previewDialogColor.value = color
   if (viewPreviewModalOpen.value) {
     void ensureOpenPreviewEntries()
-    void persistOpenPreviewEntriesIfNeeded()
   }
 }
 
@@ -13112,27 +13474,25 @@ function handleLayerRowDblClick(layer: LayerListEntry) {
 }
 
 async function renderView(view: string, size: string, color = selectedColor.value) {
-  const partBlobs = await canvasRef.value?.exportPartBlobs?.(size)
-  const form = new FormData()
-  form.append("template_id", selectedTemplateId.value)
-  form.append("selected_color", color)
-  form.append("selected_view", view)
-  form.append("output_size", size)
-  if (shouldUsePublishedRuntime()) {
-    form.append("published_only", "true")
-  }
-  form.append("compose_overrides", JSON.stringify(editorPayload.value?.compose_params || {}))
-  if (partBlobs?.length) {
-    form.append("part_names", partBlobs.map((item) => item.partName).join(","))
-    partBlobs.forEach((item) => {
-      form.append("part_images", new File([item.blob], `${item.partName}.png`, { type: "image/png" }))
-    })
-  }
-  return await gatewayPlatformFetch<ComposeResponse>("/api/v1/runtime/editor/compose", {
-    method: "POST",
-    headers: authStore.authHeaders,
-    body: form,
+  const result = await requestPreviewCompose({
+    color,
+    view,
+    size,
+    mode: activePreviewMode(),
   })
+  if (!result) {
+    return { outputs: [] } as ComposeResponse
+  }
+  commitPreviewComposeResult({
+    color,
+    view,
+    size,
+    mode: activePreviewMode(),
+    url: result.url,
+    filePath: result.filePath,
+    signature: result.signature,
+  })
+  return result.response
 }
 
 async function mergeOutputs(entries: RenderOutputEntry[], options?: { waitForPersistence?: boolean }) {
@@ -13244,7 +13604,7 @@ async function exportBatchToResults(options?: { downloadZip?: boolean }) {
     writeWorkspacePreferences()
     await authStore.refreshSession()
   } catch (error) {
-    renderError.value = String((error as Error).message || error)
+    renderError.value = resolvePreviewRequestErrorMessage(error)
   } finally {
     isBatchExporting.value = false
     isBatchDownloading.value = false
@@ -13259,7 +13619,7 @@ async function downloadAllOutputs() {
     const payload = await archiveRuntimeRenderFiles(filePaths)
     triggerDownload(renderFileUrl(payload.file_path, true))
   } catch (error) {
-    renderError.value = String((error as Error).message || error)
+    renderError.value = resolvePreviewRequestErrorMessage(error)
   }
 }
 
@@ -13961,11 +14321,21 @@ watch(
 
 watch(
   () => viewPreviewModalOpen.value
-    ? previewDialogEntries.value.map((entry) => `${entry.cacheKey}:${entry.url}`).join("|")
+    ? [
+      ...previewDialogEntries.value.map((entry) => `${entry.cacheKey}:${entry.url}`),
+      activePreviewDialogEntry.value ? `${activePreviewDialogEntry.value.cacheKey}:${activePreviewDialogEntry.value.url}` : "",
+    ].join("|")
     : "",
   (signature) => {
     if (!viewPreviewModalOpen.value || !signature) return
-    void preloadPreviewDialogEntries(previewDialogEntries.value)
+    const preloadEntries = [
+      ...previewDialogEntries.value,
+      ...(activePreviewDialogEntry.value ? [{
+        loadKey: activePreviewDialogEntry.value.loadKey,
+        url: activePreviewDialogEntry.value.url,
+      }] : []),
+    ]
+    void preloadPreviewDialogEntries(preloadEntries)
   },
   { immediate: true },
 )

@@ -335,6 +335,7 @@ const uploadResult = ref<any>(null)
 const templateCodeCheckState = ref<"idle" | "checking" | "available" | "blocked">("idle")
 const templateCodeHint = ref("")
 const lastCheckedTemplateCode = ref("")
+const existingTemplateIdFallback = ref("")
 let templateCodeCheckTimer: number | null = null
 
 // Computed properties
@@ -376,7 +377,12 @@ function resetForm() {
   templateCodeCheckState.value = "idle"
   templateCodeHint.value = ""
   lastCheckedTemplateCode.value = ""
+  existingTemplateIdFallback.value = ""
   uploadStore.resetInspection()
+}
+
+function resolveEffectiveTemplateId() {
+  return existingTemplateIdFallback.value.trim() || props.templateId.trim()
 }
 
 watch(() => [props.isOpen, props.templateId, props.initialTemplateCode, props.initialTemplateName, props.initialCategoryId], () => {
@@ -503,6 +509,7 @@ async function handleTemplateCodeBlur() {
 
 async function ensureTemplateCodeAvailable() {
   const templateCode = formData.value.templateCode.trim()
+  const effectiveTemplateId = resolveEffectiveTemplateId()
   if (!templateCode) return false
   if (!/^[a-zA-Z0-9][a-zA-Z0-9_-]{1,63}$/.test(templateCode)) {
     templateCodeCheckState.value = "blocked"
@@ -515,10 +522,13 @@ async function ensureTemplateCodeAvailable() {
   templateCodeCheckState.value = "checking"
   templateCodeHint.value = t("checkingTemplateCode")
   try {
-    const result = await uploadStore.checkTemplateCode(templateCode, props.templateId || "")
+    const result = await uploadStore.checkTemplateCode(templateCode, effectiveTemplateId)
     const resolvedTemplateCode = result.template_code || templateCode
     if (resolvedTemplateCode !== templateCode) {
       formData.value.templateCode = resolvedTemplateCode
+    }
+    if (isReupload.value) {
+      existingTemplateIdFallback.value = String(result.existing_template_id || "").trim()
     }
     lastCheckedTemplateCode.value = resolvedTemplateCode
     if (result.available) {
@@ -558,8 +568,9 @@ async function startUpload() {
       uploadError.value = templateCodeHint.value || t("templateCodeExists")
       return
     }
+    const effectiveTemplateId = resolveEffectiveTemplateId()
     // First inspect the file
-    await uploadStore.inspect(selectedFile.value!, formData.value.templateName, formData.value.templateCode, props.templateId || "")
+    await uploadStore.inspect(selectedFile.value!, formData.value.templateName, formData.value.templateCode, effectiveTemplateId)
     if (uploadStore.error) {
       uploadError.value = normalizeTemplateUploadError(uploadStore.error)
       isUploading.value = false
@@ -588,7 +599,7 @@ async function startUpload() {
       formData.value.categoryId,
       suggestedConfig,
       uploadStore.inspection?.inspect_job_id || "",
-      props.templateId || "",
+      effectiveTemplateId,
     )
     
     if (uploadStore.error) {

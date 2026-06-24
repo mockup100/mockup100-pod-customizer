@@ -9,7 +9,13 @@
     - WP iframe shell：仅显示 Subscribe + Close（trial CTA 不出现，规避 wp.org #7 promotion 红线）
     - 已用过 trial 的账号：trial 按钮消失，仅 Subscribe + Close
   -->
-  <Modal :is-open="true" size="sm" @close="emit('close')" @update:isOpen="handleToggle">
+  <Modal
+    :is-open="true"
+    size="sm"
+    overlay-class="grading-gate-overlay"
+    @close="emit('close')"
+    @update:isOpen="handleToggle"
+  >
     <template #header>
       <h2>{{ t('gradingGate.title') }}</h2>
     </template>
@@ -208,3 +214,6 @@ async function startTrial() {
   color: #0f172a;
 }
 </style>
+.grading-gate-overlay {
+  z-index: 11000;
+}

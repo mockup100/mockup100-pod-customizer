@@ -5,8 +5,8 @@
  *   - 第一次点击必须显式 confirm 同意框,告知"会把订单设计字段发送给
  *     https://www.mockup100.com Grading API",同意后才发起 AJAX,后端写入
  *     一次性 user_meta 记忆同意状态。
- *   - 未订阅 Grading 时,SaaS 端返回 402 + subscription_required,本脚本
- *     渲染订阅提示并提供"打开订阅页"按钮(在新标签里打开 mockup100.com),
+ *   - 若当前账号不可用该外部服务,SaaS 端返回 402 + subscription_required,本脚本
+ *     渲染中性的 service-page 跳转按钮(在新标签里打开 mockup100.com),
  *     不在 wp-admin 里弹任何付款表单/license 校验。
  */
 (function ($) {
@@ -33,7 +33,7 @@
         statusEl.empty();
         var $msg = $('<div></div>')
             .css({ color: '#b32d2e', marginBottom: '4px' })
-            .text(message || i18n.subscriptionRequired || 'Subscription required.');
+            .text(message || i18n.subscriptionRequired || 'This external service is not currently available.');
         statusEl.append($msg);
         if (subscriptionUrl) {
             var $link = $('<a></a>')
@@ -41,7 +41,7 @@
                 .attr('target', '_blank')
                 .attr('rel', 'noopener')
                 .addClass('button button-secondary')
-                .text(i18n.subscribe || 'Open subscription page');
+                .text(i18n.subscribe || 'Open Mockup100 service page');
             statusEl.append($link);
         }
     }

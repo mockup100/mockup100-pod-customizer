@@ -8,7 +8,7 @@
       leave-from-class="opacity-100"
       leave-to-class="opacity-0"
     >
-      <div v-if="isOpen" class="modal-overlay" @click="handleOverlayClick">
+      <div v-if="isOpen" :class="['modal-overlay', props.overlayClass]" @click="handleOverlayClick">
         <Transition
           enter-active-class="transition-all duration-300 ease-out"
           enter-from-class="opacity-0 scale-95"
@@ -63,6 +63,7 @@ interface Props {
   closeOnEscape?: boolean
   centered?: boolean
   scrollable?: boolean
+  overlayClass?: string
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -71,7 +72,8 @@ const props = withDefaults(defineProps<Props>(), {
   closeOnOverlay: true,
   closeOnEscape: true,
   centered: true,
-  scrollable: true
+  scrollable: true,
+  overlayClass: ''
 })
 
 const emit = defineEmits<{

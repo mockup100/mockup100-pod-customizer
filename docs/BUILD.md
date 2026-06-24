@@ -5,6 +5,12 @@ rebuild every custom-generated asset shipped in this plugin from the
 human-readable source code that travels with the same repository and release
 package.
 
+The WordPress.org release zip is intentionally not a full development sandbox.
+It only carries the minimum source and build files required to study and
+rebuild the shipped frontend assets. Packaging helpers and local PHP test stubs
+remain available in the public GitHub repository, but are excluded from the
+runtime distribution archive so the release package stays review-friendly.
+
 ## 1. Toolchain
 
 | Tool | Version |
@@ -109,3 +115,7 @@ The maintained public repository is:
 
 The release package and the public repository expose the same source tree and
 build entry points for the custom WordPress editor bundle.
+
+Additional development helpers that are intentionally kept out of the release
+zip, such as `scripts/package-plugin.sh` and local PHP test stubs, remain
+publicly accessible in the GitHub repository above.
